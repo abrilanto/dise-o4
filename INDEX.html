@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratorio de Prompts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F6F1E7;
+    --paper:#FFFDF8;
+    --terracotta:#B65935;
+    --terracotta-deep:#9C4527;
+    --ochre:#C9962E;
+    --espresso:#3A2A1E;
+    --ink:#2B211A;
+    --line:rgba(58,42,30,0.14);
+    --ideal:#4C6B4F;
+    --ideal-bg:#E7EEE3;
+    --aceptable:#A9782B;
+    --aceptable-bg:#F3E7CC;
+    --afinar:#A2472F;
+    --afinar-bg:#F5E2DA;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Public Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 20px 80px;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    color:var(--espresso);
+    margin:0;
+  }
+  .top{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:22px;
+  }
+  .sun{
+    flex:0 0 auto;
+    width:38px;height:38px;
+  }
+  .top-title{
+    font-size:1.05rem;
+    letter-spacing:0.02em;
+    color:var(--terracotta-deep);
+    font-weight:600;
+    text-transform:uppercase;
+    font-family:'Public Sans',sans-serif;
+    font-size:0.78rem;
+  }
+  .progress{
+    display:flex;
+    gap:6px;
+    margin:6px 0 30px;
+  }
+  .dot{
+    flex:1;
+    height:5px;
+    border-radius:3px;
+    background:var(--line);
+  }
+  .dot.done{background:var(--terracotta);}
+  .dot.current{background:var(--ochre);}
+
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:26px 24px;
+    margin-bottom:20px;
+  }
+
+  /* INTRO */
+  .intro h1{font-size:2rem;line-height:1.15;margin-bottom:10px;}
+  .intro p.lead{font-size:1.02rem;line-height:1.55;color:var(--espresso);opacity:0.9;margin-bottom:22px;}
+  .blocks-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:24px;}
+  .block-def{
+    display:flex;gap:12px;align-items:flex-start;
+    background:var(--cream);
+    border-radius:12px;
+    padding:12px 14px;
+  }
+  .block-def .num{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    color:var(--terracotta);
+    font-size:1.1rem;
+    min-width:20px;
+  }
+  .block-def strong{display:block;font-family:'Fraunces',serif;font-size:1rem;color:var(--espresso);}
+  .block-def span{font-size:0.9rem;color:var(--espresso);opacity:0.85;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--terracotta);
+    color:var(--paper);
+    border:none;
+    padding:13px 26px;
+    border-radius:999px;
+    font-family:'Public Sans',sans-serif;
+    font-weight:600;
+    font-size:0.95rem;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+    width:100%;
+  }
+  .btn:hover{background:var(--terracotta-deep);}
+  .btn:active{transform:scale(0.98);}
+  .btn:disabled{
+    background:#D8D0C3;
+    color:#8B8378;
+    cursor:not-allowed;
+  }
+  .btn.secondary{
+    background:transparent;
+    border:1.5px solid var(--terracotta);
+    color:var(--terracotta-deep);
+  }
+  .btn.secondary:hover{background:rgba(182,89,53,0.08);}
+
+  /* SCENARIO */
+  .office-tag{
+    display:inline-block;
+    background:var(--ochre);
+    color:var(--paper);
+    font-size:0.72rem;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    padding:5px 12px;
+    border-radius:999px;
+    margin-bottom:14px;
+  }
+  .request-box{
+    background:var(--cream);
+    border-left:4px solid var(--espresso);
+    border-radius:8px;
+    padding:16px 18px;
+    font-style:italic;
+    font-size:0.97rem;
+    line-height:1.55;
+    color:var(--espresso);
+    margin-bottom:8px;
+  }
+  .request-label{
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--terracotta-deep);
+    font-weight:700;
+    margin-bottom:18px;
+    display:block;
+  }
+  .category{
+    margin-bottom:22px;
+  }
+  .category h3{
+    font-size:1.02rem;
+    margin-bottom:3px;
+  }
+  .category .helper{
+    font-size:0.85rem;
+    color:var(--espresso);
+    opacity:0.7;
+    margin-bottom:10px;
+    display:block;
+  }
+  .chips{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .chip{
+    text-align:left;
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:0.93rem;
+    line-height:1.4;
+    color:var(--ink);
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .chip:hover{border-color:var(--ochre);}
+  .chip.selected{
+    border-color:var(--terracotta);
+    background:#FBF0E9;
+    font-weight:600;
+  }
+
+  /* FEEDBACK */
+  .compare{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+    margin-bottom:8px;
+  }
+  .compare-col h3{
+    font-size:0.85rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin-bottom:10px;
+    color:var(--terracotta-deep);
+  }
+  .compare-col.ref h3{color:var(--ideal);}
+  .field{
+    margin-bottom:12px;
+  }
+  .field .field-label{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    font-weight:700;
+    color:var(--espresso);
+    opacity:0.65;
+    display:block;
+    margin-bottom:3px;
+  }
+  .field .field-text{
+    font-size:0.92rem;
+    line-height:1.45;
+  }
+  hr.sep{
+    border:none;
+    border-top:1px solid var(--line);
+    margin:22px 0;
+  }
+  .feedback-item{
+    display:flex;
+    gap:12px;
+    margin-bottom:14px;
+    align-items:flex-start;
+  }
+  .tier-badge{
+    flex:0 0 auto;
+    font-size:0.68rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    padding:4px 10px;
+    border-radius:999px;
+    margin-top:1px;
+    white-space:nowrap;
+  }
+  .tier-badge.ideal{background:var(--ideal-bg);color:var(--ideal);}
+  .tier-badge.aceptable{background:var(--aceptable-bg);color:var(--aceptable);}
+  .tier-badge.afinar{background:var(--afinar-bg);color:var(--afinar);}
+  .feedback-text strong{font-family:'Fraunces',serif;font-weight:600;}
+  .feedback-text{font-size:0.92rem;line-height:1.5;}
+
+  .nav-row{display:flex;gap:10px;margin-top:6px;}
+
+  /* PROFILE */
+  .profile-title{font-size:1.6rem;margin-bottom:6px;}
+  .profile-sub{font-size:0.9rem;color:var(--espresso);opacity:0.75;margin-bottom:22px;}
+  .stat-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+    font-size:0.92rem;
+  }
+  .stat-row:last-child{border-bottom:none;}
+  .stat-bar-bg{
+    flex:1;
+    height:8px;
+    background:var(--cream);
+    border-radius:4px;
+    margin:0 12px;
+    overflow:hidden;
+  }
+  .stat-bar-fill{height:100%;background:var(--terracotta);border-radius:4px;}
+  .profile-note{
+    background:var(--cream);
+    border-radius:12px;
+    padding:18px;
+    margin-top:20px;
+    font-size:0.95rem;
+    line-height:1.6;
+  }
+  .profile-note strong{font-family:'Fraunces',serif;}
+  .closing{
+    font-size:0.88rem;
+    line-height:1.6;
+    opacity:0.85;
+    margin-top:18px;
+  }
+
+  @media (min-width:640px){
+    .compare{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <svg class="sun" viewBox="0 0 64 64" fill="none">
+      <circle cx="32" cy="32" r="12" fill="#C9962E"/>
+      <g stroke="#B65935" stroke-width="3" stroke-linecap="round">
+        <line x1="32" y1="4" x2="32" y2="14"/>
+        <line x1="32" y1="50" x2="32" y2="60"/>
+        <line x1="4" y1="32" x2="14" y2="32"/>
+        <line x1="50" y1="32" x2="60" y2="32"/>
+        <line x1="12" y1="12" x2="19" y2="19"/>
+        <line x1="45" y1="45" x2="52" y2="52"/>
+        <line x1="52" y1="12" x2="45" y2="19"/>
+        <line x1="19" y1="45" x2="12" y2="52"/>
+      </g>
+    </svg>
+    <div class="top-title">Laboratorio de Prompts</div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div id="app"></div>
+
+</div>
+
+<script>
+const scenarios = [
+  {
+    office: "Secretaría del Consejo Superior",
+    request: "\u201cNecesito mandarles a los consejeros superiores el recordatorio de que tienen que subir la documentación de los puntos del orden del día antes de la sesión que viene, porque la última vez varios llegaron sin nada y se atrasó todo.\u201d",
+    categories: {
+      rol: [
+        {text:"Actuás como responsable de la Secretaría del Consejo Superior, comunicándote con los consejeros superiores como pares institucionales, no como un aviso administrativo de rutina.", tier:"ideal", note:"Los consejeros superiores no son un público cautivo como lo sería un alumno: son autoridades de otras facultades, y eso cambia el registro de todo el mensaje."},
+        {text:"Actuás en representación de la Secretaría del Consejo Superior.", tier:"aceptable", note:"Ubica bien el área que habla, pero no anticipa que el interlocutor exige un trato de par, no de aviso administrativo."},
+        {text:"Redactás en nombre del Rectorado.", tier:"aceptable", note:"Correcto institucionalmente, aunque pierde la especificidad de que es la Secretaría del Consejo Superior quien gestiona este trámite puntual."},
+        {text:"Sos quien escribe el recordatorio.", tier:"afinar", note:"No dice ni el área ni que el destinatario son consejeros superiores, así que la IA no tiene con qué calibrar el tono institucional."}
+      ],
+      contexto: [
+        {text:"En la sesión anterior varios consejeros superiores llegaron sin la documentación de los puntos del orden del día, lo que demoró el tratamiento de los temas; hay una sesión próxima con nueva fecha límite para subir esa documentación.", tier:"ideal", note:"Explica el antecedente (la demora anterior) y la urgencia (fecha límite próxima), que es justo lo que justifica el recordatorio sin sonar arbitrario."},
+        {text:"La última sesión se atrasó porque faltaba documentación.", tier:"aceptable", note:"Da el antecedente, pero no menciona la fecha límite de la próxima sesión, que es el dato que activa la urgencia real del mensaje."},
+        {text:"Hay una sesión próxima del Consejo Superior.", tier:"aceptable", note:"Marca la urgencia de la fecha, pero pierde el antecedente que explica por qué este recordatorio es necesario esta vez."},
+        {text:"Hay que subir documentación antes de una sesión.", tier:"afinar", note:"Tan general que no explica ni el problema anterior ni por qué esta vez hace falta insistir."}
+      ],
+      tarea: [
+        {text:"Redactá un recordatorio que informe la fecha límite para subir la documentación, mencione brevemente por qué es importante esta vez (la demora anterior) y indique dónde deben cargarla.", tier:"ideal", note:"Especifica las tres cosas que este recordatorio necesita: fecha, motivo y canal de carga, sin las cuales el mensaje puede sonar a un simple \u201cavisen a tiempo\u201d."},
+        {text:"Redactá un recordatorio sobre la fecha límite para subir la documentación.", tier:"aceptable", note:"Cumple la función básica, pero no pide justificar por qué esta vez conviene insistir, que es lo que le da peso institucional al mensaje."},
+        {text:"Escribí un aviso pidiendo que suban los documentos a tiempo.", tier:"aceptable", note:"Recoge la idea general, pero no asegura que quede indicado el canal de carga ni la fecha exacta."},
+        {text:"Escribí algo para mandarles.", tier:"afinar", note:"No dice qué información concreta debe llevar el mensaje ni qué lo distingue de un aviso genérico."}
+      ],
+      formato: [
+        {text:"Comunicación institucional breve dirigida a consejeros superiores, con tono de par a par, fecha límite destacada y referencia al canal o plataforma de carga de documentación.", tier:"ideal", note:"Define registro, jerarquía visual de la fecha y el dato práctico del canal, todo lo que un mensaje entre autoridades institucionales necesita."},
+        {text:"Un mail formal a los consejeros.", tier:"aceptable", note:"Marca el canal y el registro, pero no cómo destacar la fecha ni si hay que mencionar dónde cargar la documentación."},
+        {text:"Un recordatorio corto.", tier:"aceptable", note:"Pide brevedad, pero no aclara el tono ni la estructura que corresponde a este tipo de interlocutor."},
+        {text:"Un mensaje, sin especificar tono ni estructura.", tier:"afinar", note:"Sin estas precisiones, el resultado puede sonar más a un aviso de secretaría de alumnos que a una comunicación entre autoridades."}
+      ],
+      restricciones: [
+        {text:"Mantener un tono de colega institucional, no de reto administrativo; no individualizar a quiénes llegaron sin documentación la vez anterior; el mensaje debe leerse como una gestión de proceso, no como un llamado de atención.", tier:"ideal", note:"Es la restricción que evita el riesgo real de este pedido: que un recordatorio a autoridades de otras facultades suene a reprimenda."},
+        {text:"Que no suene a reto.", tier:"aceptable", note:"Cuida el tono general, pero no protege el otro punto sensible: no señalar a nadie en particular."},
+        {text:"No mencionar a nadie en particular.", tier:"aceptable", note:"Cuida la discreción institucional, pero no dice nada sobre evitar el tono de llamado de atención."},
+        {text:"Nada en especial, lo de siempre.", tier:"afinar", note:"Sin restricciones explícitas, un recordatorio a consejeros superiores corre el riesgo de sonar a reto, algo delicado entre pares institucionales."}
+      ]
+    }
+  },
+  {
+    office: "Secretaría de Asuntos Académicos",
+    request: "\u201cHay que avisarles a todos los decanos de las regionales que cambió el cronograma de evaluación institucional este año, mandale algo parecido a lo del año pasado pero actualizado, que quede claro que ahora hay una etapa nueva.\u201d",
+    categories: {
+      rol: [
+        {text:"Actuás como responsable de la Secretaría de Asuntos Académicos del Rectorado, comunicando a los decanos de las Facultades Regionales una actualización de un proceso institucional que involucra a todas las sedes del país.", tier:"ideal", note:"Marca que el destinatario son decanos de todo el país, no un público interno del Rectorado, lo que exige un tono de coordinación entre pares, no de bajada de línea."},
+        {text:"Actuás en representación de la Secretaría de Asuntos Académicos.", tier:"aceptable", note:"Ubica bien el área, pero no aclara que los destinatarios son decanos de facultades de todo el país."},
+        {text:"Redactás en nombre del Rectorado ante los decanos.", tier:"aceptable", note:"Marca bien al destinatario, aunque pierde que es específicamente Asuntos Académicos quien coordina este proceso."},
+        {text:"Sos quien escribe el aviso.", tier:"afinar", note:"No dice ni el área ni que se dirige a decanos de las regionales."}
+      ],
+      contexto: [
+        {text:"El cronograma de evaluación institucional cambió este año e incorpora una etapa nueva que no existía en ediciones anteriores; ya existe un comunicado del año pasado que puede servir de base, pero su contenido quedó desactualizado.", tier:"ideal", note:"Da los tres datos necesarios para no reciclar el comunicado viejo tal cual: qué cambió, que hay una etapa nueva y que el modelo anterior necesita actualización, no solo copiarse."},
+        {text:"El cronograma de evaluación institucional cambió este año.", tier:"aceptable", note:"Dice que hubo un cambio, pero no que existe un comunicado anterior de referencia ni que se sumó una etapa nueva."},
+        {text:"Hay un comunicado parecido del año pasado.", tier:"aceptable", note:"Rescata el antecedente, pero no explica qué cambió este año, que es lo que hay que actualizar."},
+        {text:"Es sobre el cronograma de evaluación.", tier:"afinar", note:"No aporta ningún dato que distinga este aviso del de cualquier otro año."}
+      ],
+      tarea: [
+        {text:"Redactá el comunicado a decanos actualizando el cronograma, explicando en qué consiste la etapa nueva y dejando claro que aplica a todas las Facultades Regionales del país.", tier:"ideal", note:"Pide actualizar el modelo anterior (no reescribir de cero) y deja explícito el alcance nacional, algo que no puede quedar ambiguo entre facultades."},
+        {text:"Redactá el comunicado con el cronograma actualizado.", tier:"aceptable", note:"Correcto pero no insiste en explicar la etapa nueva ni en dejar claro el alcance a todas las regionales."},
+        {text:"Avisales a los decanos que el cronograma cambió.", tier:"aceptable", note:"Cumple la idea general, pero no menciona basarse en el comunicado anterior ni detallar la etapa nueva."},
+        {text:"Hacé un mail sobre el cronograma.", tier:"afinar", note:"Tan abierto que el resultado podría omitir tanto la etapa nueva como el alcance nacional del aviso."}
+      ],
+      formato: [
+        {text:"Comunicación institucional dirigida a decanos de Facultades Regionales, con asunto claro, el cronograma en una tabla o lista y un párrafo breve explicando la etapa nueva.", tier:"ideal", note:"Resuelve el problema típico de estos avisos entre facultades: que un cambio de cronograma se pierda en un párrafo largo en vez de verse de un vistazo."},
+        {text:"Un mail formal a los decanos.", tier:"aceptable", note:"Define el canal y el registro, pero no cómo presentar el cronograma para que se lea rápido."},
+        {text:"Un aviso con el cronograma adjunto.", tier:"aceptable", note:"Prevé el cronograma como adjunto, aunque no dice cómo explicar la etapa nueva dentro del cuerpo del mensaje."},
+        {text:"Algo para mandarles a los decanos.", tier:"afinar", note:"No orienta ni el canal ni cómo debería presentarse la información del cronograma."}
+      ],
+      restricciones: [
+        {text:"Mantener el mismo nivel de formalidad que el comunicado del año anterior; dejar inequívoco que la etapa nueva aplica a todas las regionales por igual, sin distinción entre sedes.", tier:"ideal", note:"Cuida el riesgo real entre facultades regionales: que alguna sede interprete que la etapa nueva no le aplica igual que a las demás."},
+        {text:"Que sea parecido al comunicado anterior.", tier:"aceptable", note:"Da continuidad de estilo, pero no asegura que el alcance a todas las regionales quede inequívoco."},
+        {text:"Que quede claro que aplica a todas las regionales.", tier:"aceptable", note:"Ataca el riesgo principal, pero no dice nada sobre mantener la coherencia de tono con el comunicado anterior."},
+        {text:"Nada puntual.", tier:"afinar", note:"Sin esta restricción, alguna facultad regional podría interpretar que la etapa nueva no le corresponde de la misma manera."}
+      ]
+    }
+  },
+  {
+    office: "Secretaría de Extensión Universitaria",
+    request: "\u201cTodos los años a esta altura tenemos que pedirles a los directores de extensión de cada regional el informe de actividades del cuatrimestre, armame algo que podamos mandar a todos por igual pero que no suene a formulario genérico.\u201d",
+    categories: {
+      rol: [
+        {text:"Actuás como responsable de la Secretaría de Extensión Universitaria del Rectorado, solicitando un informe periódico a los directores de extensión de las Facultades Regionales de todo el país.", tier:"ideal", note:"Fija que el destinatario son directores de extensión de todo el país, un dato que evita que el pedido suene a trámite interno del Rectorado."},
+        {text:"Actuás en representación de la Secretaría de Extensión.", tier:"aceptable", note:"Ubica el área, pero no anticipa que se dirige a directores de extensión de todas las regionales del país."},
+        {text:"Redactás en nombre del Rectorado ante los directores de extensión.", tier:"aceptable", note:"Marca bien al destinatario, aunque pierde que es específicamente Extensión Universitaria quien pide el informe."},
+        {text:"Sos quien pide el informe.", tier:"afinar", note:"No dice ni el área ni quiénes son los destinatarios de este pedido periódico."}
+      ],
+      contexto: [
+        {text:"Es un pedido periódico (cada cuatrimestre) dirigido por igual a los directores de extensión de todas las Facultades Regionales del país, y en ediciones anteriores el pedido sonó a formulario genérico, lo que redujo la calidad de las respuestas.", tier:"ideal", note:"Explica por qué hace falta cambiar el enfoque: no es solo pedir un informe, es evitar que vuelva a sonar despersonalizado como antes."},
+        {text:"Se pide el informe de extensión cada cuatrimestre a todas las regionales.", tier:"aceptable", note:"Da la periodicidad y el alcance, pero no menciona el problema de tono de ediciones anteriores que motiva este pedido."},
+        {text:"El pedido anterior sonó muy genérico.", tier:"aceptable", note:"Rescata el problema a resolver, pero pierde el dato de que es un pedido periódico dirigido a todas las regionales por igual."},
+        {text:"Hay que pedir un informe de actividades.", tier:"afinar", note:"No dice ni la periodicidad, ni el alcance nacional, ni el problema de tono que hay que evitar."}
+      ],
+      tarea: [
+        {text:"Redactá el pedido de informe cuatrimestral de actividades de extensión, aplicable por igual a todas las Facultades Regionales, con un tono que reconozca el trabajo de cada sede en lugar de sonar a trámite repetitivo.", tier:"ideal", note:"Pide explícitamente evitar el tono de trámite repetitivo, que es justo lo que \u201cno suene a formulario genérico\u201d necesita."},
+        {text:"Redactá el pedido del informe cuatrimestral de extensión.", tier:"aceptable", note:"Cumple el contenido, pero no pide cuidar el tono, que es el punto central de este pedido."},
+        {text:"Pedí el informe de actividades a los directores de extensión.", tier:"aceptable", note:"Recoge la acción, pero no asegura que el resultado evite sonar a formulario genérico."},
+        {text:"Escribí algo para pedirles el informe.", tier:"afinar", note:"No indica ni la periodicidad, ni el alcance a todas las regionales, ni el cuidado de tono necesario."}
+      ],
+      formato: [
+        {text:"Comunicación institucional para todos los directores de extensión de las regionales, con el pedido concreto, el plazo de entrega y un breve reconocimiento del trabajo realizado en el cuatrimestre.", tier:"ideal", note:"El reconocimiento breve es justamente lo que evita el efecto formulario: convierte un pedido repetitivo en una comunicación que valora el trabajo de cada sede."},
+        {text:"Un mail formal pidiendo el informe.", tier:"aceptable", note:"Define canal y registro, pero no incluye el gesto de reconocimiento que evita sonar a trámite frío."},
+        {text:"Un pedido con el plazo de entrega.", tier:"aceptable", note:"Asegura que el plazo quede claro, pero no dice nada sobre el tono que evita sonar genérico."},
+        {text:"Un mensaje, sin estructura definida.", tier:"afinar", note:"Sin estas precisiones, es muy probable que el resultado repita el mismo tono de formulario que se quiere evitar."}
+      ],
+      restricciones: [
+        {text:"Evitar el tono de formulario repetitivo de años anteriores; el mensaje debe aplicar exactamente igual a todas las regionales, sin dar la impresión de un trámite despersonalizado.", tier:"ideal", note:"Ataca directamente el pedido original y agrega la condición de que el trato sea parejo entre todas las facultades regionales."},
+        {text:"Que no suene a formulario.", tier:"aceptable", note:"Repite la idea central del pedido, pero sin más detalle la IA tiene que interpretar sola qué lo distingue de un formulario."},
+        {text:"Que sea igual para todas las regionales.", tier:"aceptable", note:"Cuida la equidad entre sedes, pero no menciona el riesgo de sonar despersonalizado, que era la preocupación original."},
+        {text:"Nada en especial.", tier:"afinar", note:"El riesgo principal de este pedido —sonar a formulario genérico— queda completamente sin cubrir."}
+      ]
+    }
+  },
+  {
+    office: "Secretaría de Administración",
+    request: "\u201cNecesitamos unificar el proceso de compras entre todas las regionales para la auditoría que viene, mandale a los secretarios administrativos de cada facultad los pasos que tienen que seguir a partir de ahora, para que quede por escrito antes de que empiecen a auditar como pasó el año pasado.\u201d",
+    categories: {
+      rol: [
+        {text:"Actuás como responsable de la Secretaría de Administración del Rectorado, estableciendo formalmente un proceso unificado de compras para los secretarios administrativos de todas las Facultades Regionales.", tier:"ideal", note:"Marca que el destinatario son secretarios administrativos de todo el país y que se trata de establecer un proceso formal, no de un simple aviso interno."},
+        {text:"Actuás en representación de la Secretaría de Administración.", tier:"aceptable", note:"Ubica el área, pero no aclara que los destinatarios son secretarios administrativos de todas las regionales."},
+        {text:"Redactás en nombre del Rectorado ante los secretarios administrativos.", tier:"aceptable", note:"Marca bien al destinatario, aunque pierde que es específicamente Administración quien establece este proceso."},
+        {text:"Sos quien escribe los pasos.", tier:"afinar", note:"No dice ni el área ni quiénes son los destinatarios ni que se trata de un proceso formal unificado."}
+      ],
+      contexto: [
+        {text:"Se aproxima una auditoría del proceso de compras y el año pasado la falta de un procedimiento unificado y por escrito entre las regionales generó inconsistencias durante esa auditoría; ahora se necesita establecer el mismo proceso para todas las Facultades Regionales antes de que comience.", tier:"ideal", note:"Explica el motivo real detrás del pedido: evitar que se repitan las inconsistencias del año pasado por no tener un proceso unificado y por escrito."},
+        {text:"Se viene una auditoría de compras.", tier:"aceptable", note:"Da la urgencia, pero pierde el antecedente de las inconsistencias del año pasado que explican por qué ahora hay que unificar el proceso."},
+        {text:"El año pasado hubo problemas por no tener el proceso unificado.", tier:"aceptable", note:"Rescata el antecedente, pero no menciona que hay una auditoría próxima que le da urgencia al pedido."},
+        {text:"Hay que avisar sobre el proceso de compras.", tier:"afinar", note:"No dice nada sobre la auditoría próxima ni sobre las inconsistencias del año pasado que motivan este pedido."}
+      ],
+      tarea: [
+        {text:"Redactá la comunicación que establece el procedimiento unificado de compras para todas las Facultades Regionales, detallando los pasos a seguir y dejando explícito que debe estar implementado antes del inicio de la auditoría.", tier:"ideal", note:"Especifica que hay que detallar pasos concretos y fijar el plazo de implementación, evitando que la comunicación quede en una declaración de intenciones."},
+        {text:"Redactá los pasos del proceso unificado de compras.", tier:"aceptable", note:"Pide el contenido central, pero no menciona que debe quedar implementado antes de la auditoría, que es la urgencia real."},
+        {text:"Avisales a los secretarios administrativos los pasos nuevos.", tier:"aceptable", note:"Recoge la acción de avisar, pero no asegura que se detallen los pasos con la precisión que un proceso unificado necesita."},
+        {text:"Escribí algo sobre las compras.", tier:"afinar", note:"No indica que se trata de establecer pasos formales ni que hay una fecha límite ligada a la auditoría."}
+      ],
+      formato: [
+        {text:"Comunicación institucional formal a los secretarios administrativos de las Facultades Regionales, con los pasos numerados en orden de ejecución y la fecha límite de implementación antes de la auditoría.", tier:"ideal", note:"La numeración en orden de ejecución es clave para que un proceso administrativo se aplique igual en todas las sedes, sin margen de interpretación."},
+        {text:"Un mail formal con los pasos.", tier:"aceptable", note:"Define el canal y el registro, pero no que los pasos deban ir numerados en orden de ejecución."},
+        {text:"Una lista de pasos a seguir.", tier:"aceptable", note:"Ordena el contenido, pero no fija la fecha límite ligada a la auditoría dentro del mismo mensaje."},
+        {text:"Un mensaje, sin estructura definida.", tier:"afinar", note:"Sin estructura, es fácil que el procedimiento se aplique de forma distinta en cada facultad regional."}
+      ],
+      restricciones: [
+        {text:"Dejar constancia por escrito de que el procedimiento rige para todas las regionales por igual, sin excepciones, y que debe quedar implementado antes de que comience la auditoría.", tier:"ideal", note:"Es la restricción que resuelve el problema de fondo: evitar que alguna regional aplique el proceso de forma distinta o fuera de plazo."},
+        {text:"Que quede por escrito antes de la auditoría.", tier:"aceptable", note:"Cubre el plazo, pero no deja explícito que el procedimiento rige sin excepciones para todas las regionales."},
+        {text:"Que aplique a todas las regionales.", tier:"aceptable", note:"Cuida la equidad entre sedes, pero no fija el plazo de implementación ligado a la auditoría."},
+        {text:"Nada en especial.", tier:"afinar", note:"Sin esta restricción, el procedimiento podría quedar implementado de forma desigual entre regionales, justo lo que motivó el pedido."}
+      ]
+    }
+  }
+];
+
+const CAT_ORDER = ["rol","contexto","tarea","formato","restricciones"];
+const CAT_META = {
+  rol: {label:"Rol", helper:"¿Desde qué lugar institucional habla la IA?"},
+  contexto: {label:"Contexto", helper:"¿Qué necesita saber la IA antes de escribir?"},
+  tarea: {label:"Tarea", helper:"¿Qué tiene que producir exactamente?"},
+  formato: {label:"Formato", helper:"¿Cómo tiene que verse el resultado?"},
+  restricciones: {label:"Restricciones", helper:"¿Qué hay que evitar o cuidar?"}
+};
+const TIER_LABEL = {ideal:"Ideal", aceptable:"Aceptable", afinar:"Para afinar"};
+
+let state = {
+  screen:"intro", // intro | scenario | feedback | profile
+  caseIndex:0,
+  selections:[], // per scenario: {rol:optIndex,...}
+  history:[] // {caseIndex, rol:tier, contexto:tier, ...}
+};
+
+function renderProgress(){
+  const el = document.getElementById('progress');
+  el.innerHTML = "";
+  if(state.screen==="intro" || state.screen==="profile"){ el.style.display="none"; return; }
+  el.style.display="flex";
+  scenarios.forEach((s,i)=>{
+    const d = document.createElement('div');
+    d.className = "dot" + (i<state.caseIndex ? " done" : (i===state.caseIndex ? " current":""));
+    el.appendChild(d);
+  });
+}
+
+function render(){
+  renderProgress();
+  const app = document.getElementById('app');
+  if(state.screen==="intro") app.innerHTML = renderIntro();
+  else if(state.screen==="scenario") app.innerHTML = renderScenario();
+  else if(state.screen==="feedback") app.innerHTML = renderFeedback();
+  else if(state.screen==="profile") app.innerHTML = renderProfile();
+  attachHandlers();
+}
+
+function renderIntro(){
+  return `
+  <div class="card intro">
+    <h1>Laboratorio de Prompts</h1>
+    <p class="lead">Vas a recibir pedidos reales tal como llegan en el día a día administrativo: vagos, informales, a veces incompletos. Tu trabajo es transformarlos en un buen prompt, eligiendo qué decirle a la IA en cinco bloques.</p>
+    <div class="blocks-grid">
+      ${CAT_ORDER.map((c,i)=>`
+        <div class="block-def">
+          <span class="num">${i+1}</span>
+          <div><strong>${CAT_META[c].label}</strong><span>${CAT_META[c].helper}</span></div>
+        </div>`).join("")}
+    </div>
+    <p class="lead" style="font-size:0.9rem;opacity:0.8;">No hay una única combinación correcta. Vas a ver tu prompt al lado de una versión de referencia, con la explicación de por qué cada elección suma o se puede afinar. El error acá no se penaliza: se explica.</p>
+    <button class="btn" data-action="start">Empezar con el primer caso</button>
+  </div>`;
+}
+
+function renderScenario(){
+  const sc = scenarios[state.caseIndex];
+  const sel = state.selections[state.caseIndex] || {};
+  const allSelected = CAT_ORDER.every(c => sel[c] !== undefined);
+  return `
+  <div class="card">
+    <span class="office-tag">${sc.office}</span>
+    <span class="request-label">Así llega el pedido</span>
+    <div class="request-box">${sc.request}</div>
+  </div>
+  <div class="card">
+    ${CAT_ORDER.map((c,ci)=>`
+      <div class="category">
+        <h3>${ci+1}. ${CAT_META[c].label}</h3>
+        <span class="helper">${CAT_META[c].helper}</span>
+        <div class="chips">
+          ${sc.categories[c].map((opt,oi)=>`
+            <button type="button" class="chip ${sel[c]===oi?'selected':''}" data-cat="${c}" data-opt="${oi}">${opt.text}</button>
+          `).join("")}
+        </div>
+      </div>
+    `).join("")}
+    <button class="btn" data-action="see-feedback" ${allSelected?"":"disabled"}>Ver comparación</button>
+  </div>`;
+}
+
+function renderFeedback(){
+  const sc = scenarios[state.caseIndex];
+  const sel = state.selections[state.caseIndex];
+  const isLast = state.caseIndex === scenarios.length - 1;
+  return `
+  <div class="card">
+    <span class="office-tag">${sc.office}</span>
+    <div class="compare">
+      <div class="compare-col mine">
+        <h3>Tu prompt</h3>
+        ${CAT_ORDER.map(c=>`
+          <div class="field">
+            <span class="field-label">${CAT_META[c].label}</span>
+            <div class="field-text">${sc.categories[c][sel[c]].text}</div>
+          </div>`).join("")}
+      </div>
+      <div class="compare-col ref">
+        <h3>Versión de referencia</h3>
+        ${CAT_ORDER.map(c=>`
+          <div class="field">
+            <span class="field-label">${CAT_META[c].label}</span>
+            <div class="field-text">${sc.categories[c].find(o=>o.tier==='ideal').text}</div>
+          </div>`).join("")}
+      </div>
+    </div>
+    <hr class="sep">
+    ${CAT_ORDER.map(c=>{
+      const opt = sc.categories[c][sel[c]];
+      return `<div class="feedback-item">
+        <span class="tier-badge ${opt.tier}">${TIER_LABEL[opt.tier]}</span>
+        <div class="feedback-text"><strong>${CAT_META[c].label}.</strong> ${opt.note}</div>
+      </div>`;
+    }).join("")}
+    <button class="btn" data-action="next-case">${isLast? "Ver mi perfil" : "Siguiente caso"}</button>
+  </div>`;
+}
+
+function computeProfile(){
+  const totals = {};
+  CAT_ORDER.forEach(c=> totals[c] = {ideal:0, aceptable:0, afinar:0});
+  state.history.forEach(entry=>{
+    CAT_ORDER.forEach(c=>{
+      totals[c][entry[c]]++;
+    });
+  });
+  return totals;
+}
+
+function renderProfile(){
+  const totals = computeProfile();
+  const n = scenarios.length;
+  let strongest = CAT_ORDER[0], weakest = CAT_ORDER[0];
+  CAT_ORDER.forEach(c=>{
+    if(totals[c].ideal > totals[strongest].ideal) strongest = c;
+    if(totals[c].afinar > totals[weakest].afinar) weakest = c;
+  });
+  const strongScore = totals[strongest].ideal;
+  const weakScore = totals[weakest].afinar;
+
+  let noteText;
+  if(weakScore === 0){
+    noteText = `Tu selección estuvo pareja en los cinco bloques, sin un punto flojo claro. Tu punto más fuerte fue <strong>${CAT_META[strongest].label}</strong>: en ${strongScore} de ${n} casos elegiste la opción que le da a la IA la mayor precisión posible. El siguiente desafío es llevar ese mismo nivel de detalle a bloques donde tendiste a quedarte en opciones aceptables, como el formato o las restricciones.`;
+  } else {
+    noteText = `Tu punto más fuerte es <strong>${CAT_META[strongest].label}</strong>: en ${strongScore} de ${n} casos elegiste la opción que más precisión le aporta a la IA. Donde más te conviene poner atención es en <strong>${CAT_META[weakest].label}</strong>: en ${weakScore} de ${n} casos elegiste una alternativa más general, que funciona pero deja que la IA complete a su criterio justo lo que ese bloque debería definir.`;
+  }
+
+  return `
+  <div class="card">
+    <h2 class="profile-title">Tu perfil como diseñador de prompts</h2>
+    <p class="profile-sub">Basado en tus elecciones en los ${n} casos de hoy</p>
+    ${CAT_ORDER.map(c=>{
+      const t = totals[c];
+      const pct = Math.round((t.ideal / n) * 100);
+      return `<div class="stat-row">
+        <span>${CAT_META[c].label}</span>
+        <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${pct}%"></div></div>
+        <span>${t.ideal}/${n} ideal</span>
+      </div>`;
+    }).join("")}
+    <div class="profile-note">${noteText}</div>
+    <p class="closing">Como en toda la propuesta del curso: ninguna elección acá fue "incorrecta" en un sentido estricto, algunas simplemente dejan más trabajo de interpretación en manos de la IA. Cuanto más precisos los cinco bloques, menos margen para que el resultado se aleje de lo que hacía falta.</p>
+    <button class="btn secondary" data-action="restart">Volver a empezar</button>
+  </div>`;
+}
+
+function attachHandlers(){
+  const startBtn = document.querySelector('[data-action="start"]');
+  if(startBtn) startBtn.onclick = ()=>{ state.screen="scenario"; render(); };
+
+  document.querySelectorAll('.chip').forEach(chip=>{
+    chip.onclick = ()=>{
+      const cat = chip.getAttribute('data-cat');
+      const opt = parseInt(chip.getAttribute('data-opt'));
+      if(!state.selections[state.caseIndex]) state.selections[state.caseIndex] = {};
+      state.selections[state.caseIndex][cat] = opt;
+      render();
+    };
+  });
+
+  const feedbackBtn = document.querySelector('[data-action="see-feedback"]');
+  if(feedbackBtn) feedbackBtn.onclick = ()=>{
+    if(feedbackBtn.disabled) return;
+    const sel = state.selections[state.caseIndex];
+    const sc = scenarios[state.caseIndex];
+    const entry = {};
+    CAT_ORDER.forEach(c=> entry[c] = sc.categories[c][sel[c]].tier );
+    state.history[state.caseIndex] = entry;
+    state.screen = "feedback";
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+  };
+
+  const nextBtn = document.querySelector('[data-action="next-case"]');
+  if(nextBtn) nextBtn.onclick = ()=>{
+    if(state.caseIndex < scenarios.length - 1){
+      state.caseIndex++;
+      state.screen = "scenario";
+    } else {
+      state.screen = "profile";
+    }
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+  };
+
+  const restartBtn = document.querySelector('[data-action="restart"]');
+  if(restartBtn) restartBtn.onclick = ()=>{
+    state = {screen:"intro", caseIndex:0, selections:[], history:[]};
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+  };
+}
+
+render();
+</script>
+</body>
+</html>
